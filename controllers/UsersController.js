@@ -27,6 +27,7 @@ class UsersController {
     return res.status(201).json({ id: result.insertedId, email });
   }
 
+  //   Get user details
   static async getMe(req, res) {
     const token = req.header('X-Token');
 
