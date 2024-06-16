@@ -11,7 +11,7 @@ class AuthController {
     const [email, password] = credentials.split(':');
 
     if (!email || !password) {
-      return res.status(401).json({ error: 'Unauthorized1' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const hashPassword = sha1(password);
@@ -19,7 +19,7 @@ class AuthController {
     const user = await dbClient.db.collection('users').findOne({ email, password: hashPassword });
 
     if (!user) {
-      return res.status(401).json({ error: 'Unauthorized2' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const token = uuidv4();
