@@ -6,6 +6,10 @@ import redisClient from '../utils/redis';
 class AuthController {
   static async getConnect(req, res) {
     const authHeader = req.header('Authorization') || '';
+    if (!authHeader) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
     const base64Credentials = authHeader.split(' ')[1] || '';
     const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
     const [email, password] = credentials.split(':');
