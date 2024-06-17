@@ -10,13 +10,13 @@ class FIlesController {
   static async postUpload(req, res) {
     const token = req.header('X-TOken');
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized1' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const key = `auth_${token}`;
     const userId = await redisClient.get(key);
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized2' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const {
@@ -78,6 +78,62 @@ class FIlesController {
       parentId: newFile.parentId,
       localPath: newFile.localPath,
     });
+  }
+
+  static async getShow(req, res) {
+    const token = req.header('X-TOken');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const fileId = req.params.id;
+    if (!ObjectId.isValid(fileId)) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const file = await dbClient.db.collection('files').findOne({ _id: new ObjectId(fileId), userId: new ObjectId(userId) });
+    if (!file) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    return res.status(200).json(file);
+  }
+
+  static async getIndex(req, res) {
+    const token = req.header('X-TOken');
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const parentId = req.query.parentId ? new ObjectId(req.query.parentId) : 0;
+    const page = req.query.page ? parseInt(req.query.page, 10) : 0;
+    const pageSize = 20;
+    const skip = page * pageSize;
+
+    const query = parentId === 0 ? {
+      userId: new ObjectId(userId),
+      parentId: 0,
+    } : { userId: new ObjectId(userId), parentId };
+
+    const files = await dbClient.db.collection('files')
+      .find(query)
+      .skip(skip)
+      .limit(pageSize)
+      .toArray();
+
+    return res.status(200).json(files);
   }
 }
 
