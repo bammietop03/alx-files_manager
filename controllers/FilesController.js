@@ -102,7 +102,7 @@ class FIlesController {
       return res.status(404).json({ error: 'Not found' });
     }
 
-    return res.status(200).json(file);
+    return res.status(200).send(file);
   }
 
   static async getIndex(req, res) {
@@ -127,12 +127,12 @@ class FIlesController {
     } : { userId: new ObjectId(userId), parentId };
 
     const files = await dbClient.db.collection('files').aggregate([
-        { $match: query },
-        { $skip: skip },
-        { $limit: pageSize }
-      ]).toArray();
+      { $match: query },
+      { $skip: skip },
+      { $limit: pageSize },
+    ]).toArray();
 
-    return res.status(200).json(files);
+    return res.status(200).send(files);
   }
 }
 
