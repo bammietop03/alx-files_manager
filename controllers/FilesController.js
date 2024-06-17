@@ -118,15 +118,16 @@ class FIlesController {
     }
 
     const parentId = req.query.parentId ? new ObjectId(req.query.parentId) : 0;
-
-    if (parentId !== 0 && parentId !== '0') {
-        const ifFolder = await dbClient.db.collection('files').findOne({ _id: new ObjectId(parentId) });
-        if (!ifFolder || ifFolder.type !== 'folder') { return response.status(200).send([]); }
-    }
-
     const page = req.query.page ? parseInt(req.query.page, 10) : 0;
     const pageSize = 20;
     const skip = page * pageSize;
+
+    if (parentId !== 0) {
+        const parentFolder = await dbClient.db.collection('files').findOne({ _id: parentId, userId: new ObjectId(userId) });
+        if (!parentFolder) {
+          return res.status(200).json([]);
+        }
+    }
 
     const query = parentId === 0 ? {
       userId: new ObjectId(userId),
