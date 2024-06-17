@@ -126,11 +126,11 @@ class FIlesController {
       userId: new ObjectId(userId),
     } : { userId: new ObjectId(userId), parentId };
 
-    const files = await dbClient.db.collection('files')
-      .find(query)
-      .skip(skip)
-      .limit(pageSize)
-      .toArray();
+    const files = await dbClient.db.collection('files').aggregate([
+        { $match: query },
+        { $skip: skip },
+        { $limit: pageSize }
+      ]).toArray();
 
     return res.status(200).json(files);
   }
