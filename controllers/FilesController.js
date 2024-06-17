@@ -118,7 +118,7 @@ class FIlesController {
     }
 
     const parentId = req.query.parentId ? new ObjectId(req.query.parentId) : 0;
-    const page = req.query.page ? parseInt(req.query.page, 10) : 0;
+    const page = req.query.page ? Number(req.query.page) : 0;
     const pageSize = 20;
     const skip = page * pageSize;
 
