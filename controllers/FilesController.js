@@ -3,9 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime-types';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
+import Bull from 'bull';
+import imageThumbnail from 'image-thumbnail';
 
 const fs = require('fs');
 const path = require('path');
+
+const fileQueue = new Bull('fileQueue');
 
 class FilesController {
   static async postUpload(req, res) {
@@ -66,6 +70,10 @@ class FilesController {
       fs.writeFileSync(localPath, buffer);
 
       newFile.localPath = localPath;
+    }
+
+    if (type === 'image') {
+        await fileQueue.add({ userId });
     }
 
     const result = await dbClient.db.collection('files').insertOne(newFile);
@@ -205,15 +213,9 @@ class FilesController {
 
   static async getFile(req, res) {
     const token = req.header('X-TOken');
-    // if (!token) {
-    //   return res.status(401).json({ error: 'Not found' });
-    // }
 
     const key = `auth_${token}`;
     const userId = await redisClient.get(key);
-    // if (!userId) {
-    //   return res.status(401).json({ error: 'Unauthorized' });
-    // }
 
     const fileId = req.params.id;
     if (!ObjectId.isValid(fileId)) {
