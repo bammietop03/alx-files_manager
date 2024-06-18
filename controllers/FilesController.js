@@ -1,10 +1,10 @@
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime-types';
+import Bull from 'bull';
+// import imageThumbnail from 'image-thumbnail';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
-import Bull from 'bull';
-import imageThumbnail from 'image-thumbnail';
 
 const fs = require('fs');
 const path = require('path');
@@ -73,7 +73,7 @@ class FilesController {
     }
 
     if (type === 'image') {
-        await fileQueue.add({ userId });
+      await fileQueue.add({ userId });
     }
 
     const result = await dbClient.db.collection('files').insertOne(newFile);
